@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Air Quality Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: "Raleway", sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+            position: relative;
+        }
+        .info-overlay {
+            position: absolute;
+            top: 110px; /* ปรับให้สูงขึ้น 20px */
+            left: 20px;
+            width: 500px; /* ขยายความกว้างของกล่องข้อความ */
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-size: 18px;
+            z-index: 1000;
+            display: none; /* ซ่อนกล่องข้อความเริ่มต้น */
+        }
+        .close-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+        .back-button {
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            border: 2px solid #000000;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        .toggle-button {
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            border: 2px solid #000000;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 100px; /* ปรับตำแหน่งของปุ่มให้ต่ำลง */
+            left: 20px;
+            z-index: 1000;
+        }
+        .search-box {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Toggle Button -->
+<button class="toggle-button" onclick="toggleInfoOverlay()">Importance</button>
+
+<!-- Informational Overlay -->
+<div class="info-overlay" id="infoOverlay">
+    <button class="close-button" onclick="closeInfoOverlay()">✖</button>
+    <strong>Air quality in the Andaman coastal provinces of southern Thailand</strong> is crucial due to its impact on public health, tourism, and environmental sustainability. Good air quality reduces health risks, particularly respiratory and cardiovascular issues, which significantly affect vulnerable populations, including children, the elderly, and those with pre-existing health conditions.
+    
+    <p>In the context of tourism, this region, with popular destinations like Phuket, Krabi, and Phang Nga, heavily relies on maintaining a clean environment to attract visitors. High air quality not only enhances the appeal of these coastal areas but also supports the overall economic growth linked to the tourism sector.</p>
+    
+    <p>Additionally, preserving air quality is essential for protecting the delicate marine and coastal ecosystems in the Andaman region. These ecosystems provide critical resources and habitats for diverse marine life and play a role in mitigating climate change impacts. Therefore, maintaining air quality is indispensable for ensuring the well-being of local communities, sustaining tourism, and preserving the environment in southern Thailand’s coastal areas.</p>
+</div>
+
+<!-- Back Button -->
+<button class="back-button" onclick="window.location.href='overview.html'">Back to Overview</button>
+
+<div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search for provinces..." onkeyup="searchProvince()">
+</div>
+
+<div id="map"></div>
+
+<script src="locations.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    // Create the Leaflet map
+    const mymap = L.map('map').setView([7.884488, 98.391283], 8);
+
+    // Define base layers
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    });
+
+    // Add default layer
+    osmLayer.addTo(mymap);
+
+    // Layer control for toggling between layers
+    const baseLayers = {
+        "OpenStreetMap": osmLayer,
+        "Satellite": satelliteLayer
+    };
+    
+    L.control.layers(baseLayers).addTo(mymap);
+
+    // Create a dictionary to store markers for provinces
+    const markers = {};
+
+    function getAQIStatus(aqi) {
+        if (aqi <= 50) return { status: "Good", color: "#4CAF50" };
+        if (aqi <= 100) return { status: "Moderate", color: "#FFEB3B" };
+        if (aqi <= 150) return { status: "Unhealthy for Sensitive Groups", color: "#FF9800" };
+        if (aqi <= 200) return { status: "Unhealthy", color: "#F44336" };
+        if (aqi <= 300) return { status: "Very Unhealthy", color: "#9C27B0" };
+        return { status: "Hazardous", color: "#7E0023" };
+    }
+
+    function createAQIIcon(aqi, color) {
+        const iconDiv = document.createElement('div');
+        iconDiv.style.backgroundColor = color;
+        iconDiv.style.color = 'white';
+        iconDiv.style.width = '40px';
+        iconDiv.style.height = '40px';
+        iconDiv.style.display = 'flex';
+        iconDiv.style.alignItems = 'center';
+        iconDiv.style.justifyContent = 'center';
+        iconDiv.style.borderRadius = '5px';
+        iconDiv.style.border = '2px solid black';
+        iconDiv.style.fontSize = '16px';
+        iconDiv.innerHTML = aqi;
+        return iconDiv;
+    }
+
+    async function fetchAQI(lat, lon) {
+        const apiKey = '7245059cef47470a453d10132c71be5228682563';
+        const url = `https://api.waqi.info/feed/geo:${lat};${lon}/?token=${apiKey}`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.status === 'ok' ? data.data.aqi : null;
+        } catch (error) {
+            console.error("Error fetching AQI:", error);
+            return null;
+        }
+    }
+
+    async function createMarkers() {
+        for (let station of locations.data) {
+            const aqi = await fetchAQI(station.lat, station.lon);
+            if (aqi !== null) {
+                station.aqi = aqi;
+                const aqiStatus = getAQIStatus(aqi);
+                const iconDiv = createAQIIcon(aqi, aqiStatus.color);
+
+                const customIcon = L.divIcon({
+                    className: 'custom-icon',
+                    html: iconDiv.outerHTML,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40]
+                });
+
+                const popupContent = `
+                    <div style="width: 150px; text-align: center;">
+                        <h4>${station.station.name}</h4>
+                        <div style="background-color: ${aqiStatus.color}; color: white; font-size: 24px; padding: 10px;">
+                            ${aqi}
+                            <div style="font-size: 14px; margin-top: 5px;">${aqiStatus.status}</div>
+                        </div>
+                        <p style="font-size: 12px; color: #666;">Updated: ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                `;
+
+                const marker = L.marker([station.lat, station.lon], { icon: customIcon }).addTo(mymap);
+                marker.bindPopup(popupContent);
+                markers[station.station.name.toLowerCase()] = marker;
+            }
+        }
+    }
+
+    function searchProvince() {
+        const input = document.getElementById('searchInput').value.toLowerCase().trim();
+        let found = false;
+
+        for (let key in markers) {
+            if (key.includes(input)) {
+                const marker = markers[key];
+                mymap.setView(marker.getLatLng(), 12);
+                marker.openPopup();
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            alert('No matching province found');
+        }
+    }
+
+    function toggleInfoOverlay() {
+        const infoOverlay = document.getElementById('infoOverlay');
+        if (infoOverlay.style.display === 'none' || infoOverlay.style.display === '') {
+            infoOverlay.style.display = 'block'; // แสดงกล่องข้อความ
+        } else {
+            infoOverlay.style.display = 'none'; // ซ่อนกล่องข้อความ
+        }
+    }
+
+    function closeInfoOverlay() {
+        document.getElementById('infoOverlay').style.display = 'none'; // ซ่อนกล่องข้อความ
+    }
+
+    createMarkers();
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+        if (this.value === '') {
+            mymap.setView([7.884488, 98.391283], 8);
+        }
+    });
+</script>
+
+</body>
+</html>

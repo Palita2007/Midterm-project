@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Importance of Air Quality</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #e0e0e0; /* Gray background */
+            position: relative;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px 0;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(183, 181, 181, 0.1);
+            margin-left: 100px; /* Shift content box slightly to the left */
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #3f3f3f;
+        }
+
+        #widget-image {
+            position: absolute;
+            top: 50px;
+            right: 50px;
+            width: 400px; /* Increase image size */
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid rgba(0, 0, 0, 0.1); /* Soft black border */
+            background-color: #848484; /* Light background behind the image */
+            padding: 10px; /* Space between the image and the border */
+        }
+
+        @media (max-width: 1000px) {
+            #widget-image {
+                position: static;
+                display: block;
+                margin: 20px auto;
+                width: 80%; /* Adjust image size for smaller screens */
+            }
+
+            .container {
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        /* Styles for the AQI table container */
+        .aqi-container {
+            margin-bottom: 20px; /* Add space below the table */
+        }
+
+        /* Styles for the AQI table */
+        table {
+            width: 70%; /* Adjusted width for the table */
+            margin: auto; /* Centers the table */
+            margin-bottom: 30px; /* Add space below the table */
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            table-layout: fixed; /* Make columns equal width */
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #ffffff;
+            font-weight: bold;
+        }
+
+        th:nth-child(1), td:nth-child(1) { width: 25%; } /* AQI */
+        th:nth-child(2), td:nth-child(2) { width: 25%; } /* Air Pollution Level */
+        th:nth-child(3), td:nth-child(3) { width: 25%; } /* Health Implications */
+        th:nth-child(4), td:nth-child(4) { width: 25%; } /* Cautionary Statement */
+
+        .good { background-color: #449647; color: white; }
+        .moderate { background-color: #e0cf2e; color: black; }
+        .sensitive { background-color: #cb5c0d; color: white; }
+        .unhealthy { background-color: #d12a10; color: white; }
+        .very-unhealthy { background-color: #8a1c9d; color: white; }
+        .hazardous { background-color: #600c0c; color: white; }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* Zebra striping for rows */
+        }
+
+        tr:hover {
+            background-color: #f1f1f1; /* Highlight row on hover */
+        }
+
+        /* Styles for the message box */
+        .message-box {
+            width: 60%; /* Width of the box */
+            margin: 30px auto; /* Centering the box */
+            padding: 20px; /* Inner padding */
+            background-color: #fff; /* White background */
+            border: 1px solid #ccc; /* Border style */
+            border-radius: 8px; /* Rounded corners */
+            text-align: center; /* Center the text */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+        }
+
+        .message-box a {
+            text-decoration: none; /* Remove underline from link */
+            color: #0066cc; /* Link color */
+            font-weight: bold; /* Bold link text */
+        }
+
+        .message-box a:hover {
+            text-decoration: underline; /* Underline on hover */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>The Importance of Air Quality</h1>
+        <p>Air quality is crucial for human health, environmental sustainability, and economic stability. 
+           Clean air plays a vital role in ensuring well-being and maintaining a balanced ecosystem.</p>
+
+        <p>In terms of health, exposure to polluted air can cause severe respiratory and cardiovascular diseases. 
+           Pollutants like particulate matter (PM2.5), ozone, and nitrogen dioxide are known to trigger asthma, 
+           bronchitis, heart disease, and even lung cancer. Vulnerable groups, such as children, the elderly, 
+           and individuals with pre-existing conditions, are particularly at risk. Air pollution can impair lung 
+           development in children and worsen chronic illnesses in older adults. Recent studies also indicate that 
+           long-term exposure to polluted air may affect brain function, contributing to cognitive decline, learning 
+           difficulties, and mental health issues like anxiety and depression.</p>
+
+        <p>Environmental impacts of poor air quality are equally significant. Pollutants in the atmosphere 
+           contribute to climate change by increasing the concentration of greenhouse gases like carbon dioxide 
+           and methane, which lead to global warming. Additionally, toxic emissions such as sulfur dioxide and 
+           nitrogen oxides cause acid rain, damaging soil, water sources, forests, and aquatic ecosystems. 
+           This disruption of ecosystems can reduce biodiversity and harm agriculture, affecting food production 
+           and supply.</p>
+
+        <p>Economically, poor air quality places a burden on healthcare systems due to increased medical expenses 
+           and loss of productivity from pollution-related illnesses. Employees suffering from respiratory conditions 
+           may require frequent sick leave, reducing workplace efficiency. In agriculture, crop yields can decline as 
+           plants are affected by air pollutants, further impacting economic stability.</p>
+
+        <p>Maintaining good air quality is essential for safeguarding human health, protecting the environment, 
+           and ensuring sustainable economic development. Governments, organizations, and individuals must collaborate 
+           to reduce pollution and promote cleaner air for future generations.</p>
+    </div>
+
+    <div>
+        <img src="https://merger.onlineweatherforecast.info/content/20863" 
+             id="widget-image" 
+             alt="Air Quality Widget">
+    </div>
+    
+    <!-- AQI Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>AQI</th>
+                <th>Air Pollution Level</th>
+                <th>Health Implications</th>
+                <th>Cautionary Statement (for PM2.5)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="good">0 - 50</td>
+                <td class="good">Good</td>
+                <td class="good">Air quality is considered satisfactory, and air pollution poses little or no risk</td>
+                <td class="good">None</td>
+            </tr>
+            <tr>
+                <td class="moderate">51 - 100</td>
+                <td class="moderate">Moderate</td>
+                <td class="moderate">Air quality is acceptable; however, for some pollutants there may be a moderate health concern for a very small number of people who are unusually sensitive to air pollution.</td>
+                <td class="moderate">Active children and adults, and people with respiratory disease, such as asthma, should limit prolonged outdoor exertion.</td>
+            </tr>
+            <tr>
+                <td class="sensitive">101 - 150</td>
+                <td class="sensitive">Unhealthy for Sensitive Groups</td>
+                <td class="sensitive">Members of sensitive groups may experience health effects. The general public is not likely to be affected.</td>
+                <td class="sensitive">Active children and adults, and people with respiratory disease, such as asthma, should limit prolonged outdoor exertion.</td>
+            </tr>
+            <tr>
+                <td class="unhealthy">151 - 200</td>
+                <td class="unhealthy">Unhealthy</td>
+                <td class="unhealthy">Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects.</td>
+                <td class="unhealthy">Active children and adults, and people with respiratory disease, such as asthma, should avoid prolonged outdoor exertion; everyone else, especially children, should limit prolonged outdoor exertion.</td>
+            </tr>
+            <tr>
+                <td class="very-unhealthy">201 - 300</td>
+                <td class="very-unhealthy">Very Unhealthy</td>
+                <td class="very-unhealthy">Health warnings of emergency conditions. The entire population is more likely to be affected.</td>
+                <td class="very-unhealthy">Active children and adults, and people with respiratory disease, such as asthma, should avoid all outdoor exertion; everyone else, especially children, should limit outdoor exertion.</td>
+            </tr>
+            <tr>
+                <td class="hazardous">300+</td>
+                <td class="hazardous">Hazardous</td>
+                <td class="hazardous">Health alert: everyone may experience more serious health effects.</td>
+                <td class="hazardous">Everyone should avoid all outdoor exertion.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Message Box -->
+    <div class="message-box">
+        <p>For more detailed information about air quality, visit our <a href="map.html">Air Quality Map</a>.</p>
+        <p>Statistics of PM2.5 Dust Data for October 2024 <a href="AQItrends.html">Air Quality Map</a>.</p>
+    </div>
+
+</body>
+</html>

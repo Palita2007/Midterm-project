@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM2.5 Air Quality Chart and Map</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        .btn-container {
+            margin-bottom: 20px;
+        }
+        .btn {
+            margin-right: 10px;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .btn.active {
+            background-color: #0056b3;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Statistics of PM2.5 Dust Data for October 2024</h2>
+    
+    <div class="btn-container">
+        <button class="btn" onclick="toggleDataset(0)">Phang Nga</button>
+        <button class="btn" onclick="toggleDataset(1)">Trang</button>
+        <button class="btn" onclick="toggleDataset(2)">Satun</button>
+        <button class="btn" onclick="toggleDataset(3)">Ranong</button>
+        <button class="btn" onclick="toggleDataset(4)">Phuket</button>
+        <button class="btn" onclick="toggleDataset(5)">Krabi</button>
+    </div>
+
+    <canvas id="pm25Chart" width="800" height="400"></canvas>
+    
+    <h3>PM2.5 Average Values by Province for October 2024</h3>
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const ctx = document.getElementById('pm25Chart').getContext('2d');
+
+        // PM2.5 data for different provinces
+        const labels = [
+            '30/9/2024', '1/10/2024', '2/10/2024', '3/10/2024', '4/10/2024', 
+            '5/10/2024', '6/10/2024', '7/10/2024', '8/10/2024', '9/10/2024', 
+            '10/10/2024', '11/10/2024', '12/10/2024', '13/10/2024', 
+            '14/10/2024', '15/10/2024', '16/10/2024', '17/10/2024', 
+            '18/10/2024', '19/10/2024', '20/10/2024', '21/10/2024', 
+            '22/10/2024', '23/10/2024', '24/10/2024', '25/10/2024', 
+            '26/10/2024', '27/10/2024', '28/10/2024', '29/10/2024', 
+            '30/10/2024'
+        ];
+
+        const datasets = [
+            {
+                label: 'Phang Nga',
+                data: [12.82, 12.16, 12.54, 11.49, 10.65, 10.42, 11.11, 12.72, 13.14, 12.42, 13.00, 11.93, 10.45, 9.86, 11.06, 12.37, 13.26, 12.74, 12.09, 11.40, 10.31, 13.61, 15.78, 16.55, 16.77, 14.30, 11.66, 11.49, 12.19, 12.92, 13.49],
+                borderColor: 'rgba(255, 99, 132, 1)',  // Pink
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                hidden: false,
+            },
+            {
+                label: 'Trang',
+                data: [10.22, 11.21, 11.04, 9.81, 9.93, 8.22, 11.62, 13.47, 13.90, 12.82, 12.51, 14.36, 10.73, 9.39, 11.73, 12.53, 14.41, 13.88, 11.65, 10.30, 9.43, 12.50, 15.12, 11.81, 12.90, 13.53, 11.50, 12.97, 13.94, 14.80, 15.21],
+                borderColor: 'rgba(54, 162, 235, 1)', // Blue
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                hidden: false,
+            },
+            {
+                label: 'Satun',
+                data: [9.44, 8.58, 8.70, 8.30, 7.89, 10.02, 13.41, 12.71, 12.56, 11.08, 11.01, 8.90, 9.60, 8.99, 9.56, 10.27, 12.65, 9.77, 10.50, 7.64, 9.98, 11.65, 13.79, 13.09, 9.06, 10.95, 11.65, 10.67, 12.76, 12.47, 15.54],
+                borderColor: 'rgba(75, 192, 192, 1)', // Teal
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                hidden: false,
+            },
+            {
+                label: 'Ranong',
+                data: [13.50, 12.99, 14.58, 12.23, 12.20, 11.06, 10.69, 9.75, 9.72, 10.05, 12.33, 10.58, 10.09, 8.50, 9.80, 10.79, 12.65, 12.16, 12.35, 11.78, 13.55, 15.86, 15.25, 18.68, 17.45, 13.68, 9.74, 8.83, 9.62, 13.81, 15.91],
+                borderColor: 'rgba(153, 102, 255, 1)', // Purple
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                hidden: false,
+            },
+            {
+                label: 'Phuket',
+                data: [9.48, 8.49, 8.68, 8.07, 8.12, 8.75, 9.71, 9.99, 12.45, 10.18, 10.64, 8.92, 8.82, 8.82, 10.05, 9.76, 10.59, 9.32, 9.67, 8.33, 9.35, 11.34, 12.29, 12.54, 11.68, 11.82, 11.63, 9.10, 9.45, 11.43, 14.02],
+                borderColor: 'rgba(255, 159, 64, 1)', // Orange
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                hidden: false,
+            },
+            {
+                label: 'Krabi',
+                data: [10.46, 10.60, 9.90, 10.10, 9.35, 8.82, 10.26, 12.19, 12.83, 11.08, 11.19, 11.24, 9.36, 9.00, 10.68, 12.25, 13.89, 13.17, 11.44, 10.37, 8.64, 11.90, 14.55, 13.06, 13.20, 13.57, 11.30, 10.55, 12.03, 12.19, 13.14],
+                borderColor: 'rgba(255, 99, 71, 1)', // Tomato
+                backgroundColor: 'rgba(255, 99, 71, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                hidden: false,
+            },
+        ];
+
+        const data = {
+            labels: labels,
+            datasets: datasets,
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'PM2.5 Air Quality in Different Provinces'
+                    }
+                },
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'PM2.5 Value (µg/m³)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    }
+                }
+            },
+        };
+
+        const pm25Chart = new Chart(ctx, config);
+
+        function toggleDataset(index) {
+            const dataset = pm25Chart.data.datasets[index];
+            dataset.hidden = !dataset.hidden;
+            pm25Chart.update();
+
+            // Update button appearance
+            const buttons = document.querySelectorAll('.btn');
+            buttons[index].classList.toggle('active', !dataset.hidden);
+        }
+
+    // Leaflet map setup
+    const map = L.map('map').setView([8, 98.5], 7.1); // Centered in southern Thailand
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Initialize layers for each province
+    const layers = {};
+
+    // Data for province circles
+    const provinceAverages = [
+        { name: "Phang Nga", avg: 12.5, coords: [8.4506, 98.5271], color: 'rgba(255, 99, 132, 1)', fillColor: 'rgba(255, 99, 132, 0.5)' },
+        { name: "Trang", avg: 12.3, coords: [7.5645, 99.6114], color: 'rgba(54, 162, 235, 1)', fillColor: 'rgba(54, 162, 235, 0.5)' },
+        { name: "Satun", avg: 11.2, coords: [6.6238, 100.0651], color: 'rgba(75, 192, 192, 1)', fillColor: 'rgba(75, 192, 192, 0.5)' },
+        { name: "Ranong", avg: 12.8, coords: [9.9523, 98.6085], color: 'rgba(153, 102, 255, 1)', fillColor: 'rgba(153, 102, 255, 0.5)' },
+        { name: "Phuket", avg: 10.5, coords: [7.8804, 98.3923], color: 'rgba(255, 159, 64, 1)', fillColor: 'rgba(255, 159, 64, 0.5)' },
+        { name: "Krabi", avg: 11.7, coords: [8.0863, 98.9063], color: 'rgba(255, 205, 86, 1)', fillColor: 'rgba(255, 205, 86, 0.5)' },
+    ];
+
+    // Create circles and add them to respective layers
+    provinceAverages.forEach(province => {
+        const circle = L.circle(province.coords, {
+            color: province.color,
+            fillColor: province.fillColor,
+            fillOpacity: 0.5,
+            radius: province.avg * 1000
+        }).bindPopup(`<b>${province.name}</b><br>Avg PM2.5: ${province.avg} µg/m³`);
+
+        // Add each circle to a layer group named after the province
+        layers[province.name] = L.layerGroup([circle]);
+        layers[province.name].addTo(map);
+    });
+
+    // Add layer control for each province
+    L.control.layers(null, layers, { collapsed: false }).addTo(map);
+</script>
+</body>
+</html>
